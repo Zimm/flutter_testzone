@@ -1,11 +1,18 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
-import 'package:flutter_ocr/ocr_page.dart';
+
 import 'package:camera/camera.dart';
+import 'package:flutter/material.dart';
+
+import 'package:flutter_ocr/ocr_page.dart';
 
 class Splash extends StatefulWidget {
   @override
   VideoState createState() => VideoState();
+  final CameraDescription camera;
+  const Splash({
+    Key? key,
+    required this.camera,
+  }) : super(key: key);
 }
 
 class VideoState extends State<Splash> with SingleTickerProviderStateMixin {
@@ -20,8 +27,10 @@ class VideoState extends State<Splash> with SingleTickerProviderStateMixin {
   }
 
   void navigationPage() {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (context) => OCRPage(_initCam())));
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => OCRPage(
+              camera: widget.camera,
+            )));
   }
 
   @override
@@ -72,16 +81,5 @@ class VideoState extends State<Splash> with SingleTickerProviderStateMixin {
         ],
       ),
     );
-  }
-
-  Future<CameraDescription> _initCam() async {
-    try {
-      return availableCameras().then((availableCameras) {
-        return availableCameras.first;
-      });
-    } catch (MissingPluginException) {
-      print("Camera failed");
-    }
-    throw NullThrownError();
   }
 }

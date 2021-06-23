@@ -6,8 +6,8 @@ import 'package:postgres/postgres.dart';
 import 'package:camera/camera.dart';
 
 class OCRPage extends StatefulWidget {
-  late final CameraDescription camera;
-  OCRPage(camera);
+  final CameraDescription camera;
+  OCRPage({required this.camera});
 
   @override
   _OCRPageState createState() => _OCRPageState(camera);
@@ -15,11 +15,18 @@ class OCRPage extends StatefulWidget {
 
 class _OCRPageState extends State<OCRPage> {
   int _ocrCamera = FlutterMobileVision.CAMERA_BACK;
+  late CameraController _controller;
+  late Future<void> _initializeControllerFuture;
   List<Text> _texts = [];
   var connection;
-  late final CameraDescription camera;
 
   _OCRPageState(camera);
+  @override
+  void initState() {
+    super.initState();
+    _controller = CameraController(widget.camera, ResolutionPreset.medium);
+    _initializeControllerFuture = _controller.initialize();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,56 +39,61 @@ class _OCRPageState extends State<OCRPage> {
           centerTitle: true,
         ),
         body: Container(
-          height: 400,
+          height: MediaQuery.of(context).size.height,
           alignment: Alignment.center,
           width: double.infinity,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed: _read,
-                    child: Text(
-                      'Scanning',
-                      style: TextStyle(fontSize: 16),
+          child: FutureBuilder(
+              future: _initializeControllerFuture,
+              builder: (context, snapshot) {
+                return Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ElevatedButton(
+                          onPressed: _read,
+                          child: Text(
+                            'Scanning',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => {_send2DB(_texts)},
+                          child: Text(
+                            'Send To DB',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                        ElevatedButton(
+                          onPressed: () => {_send2DB(_texts)},
+                          child: Text(
+                            'Preview Image',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => {_send2DB(_texts)},
-                    child: Text(
-                      'Send To DB',
-                      style: TextStyle(fontSize: 16),
+                    Container(
+                      color: Colors.grey,
+                      alignment: Alignment.center,
+                      height: 300,
+                      child: ListView(
+                        children: _texts,
+                        scrollDirection: Axis.vertical,
+                      ),
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () => {_send2DB(_texts)},
-                    child: Text(
-                      'Preview Image',
-                      style: TextStyle(fontSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-              Container(
-                color: Colors.grey,
-                alignment: Alignment.center,
-                height: 300,
-                child: ListView(
-                  children: _texts,
-                  scrollDirection: Axis.vertical,
-                ),
-              ),
-            ],
-          ),
+                  ],
+                );
+              }),
         ),
       ),
     );
   }
 
   Future<Null> _read() async {
+    return;
     List<OcrText> texts = <OcrText>[];
     try {
       texts = await FlutterMobileVision.read(
