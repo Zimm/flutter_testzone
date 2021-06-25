@@ -7,7 +7,8 @@ class TakePictureScreen extends StatefulWidget {
   final CameraDescription camera;
 
   @override
-  TakePictureScreenState createState() => TakePictureScreenState(camera);
+  TakePictureScreenState createState() =>
+      TakePictureScreenState(camera: camera);
   const TakePictureScreen({
     Key? key,
     required this.camera,
@@ -17,8 +18,9 @@ class TakePictureScreen extends StatefulWidget {
 class TakePictureScreenState extends State<TakePictureScreen> {
   late CameraController _controller;
   late Future<void> _initializeControllerFuture;
+  final CameraDescription camera;
 
-  TakePictureScreenState(camera);
+  TakePictureScreenState({required this.camera});
   @override
   void initState() {
     super.initState();
@@ -33,6 +35,7 @@ class TakePictureScreenState extends State<TakePictureScreen> {
     );
 
     // Next, initialize the controller. This returns a Future.
+    _initializeControllerFuture = _controller.initialize();
   }
 
   @override

@@ -4,13 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobile_vision/flutter_mobile_vision.dart';
 import 'package:postgres/postgres.dart';
 import 'package:camera/camera.dart';
+import './takepicturescreen.dart';
 
 class OCRPage extends StatefulWidget {
   final CameraDescription camera;
   OCRPage({required this.camera});
 
   @override
-  _OCRPageState createState() => _OCRPageState(camera);
+  _OCRPageState createState() => _OCRPageState(camera: camera);
 }
 
 class _OCRPageState extends State<OCRPage> {
@@ -19,8 +20,9 @@ class _OCRPageState extends State<OCRPage> {
   late Future<void> _initializeControllerFuture;
   List<Text> _texts = [];
   var connection;
+  final CameraDescription camera;
 
-  _OCRPageState(camera);
+  _OCRPageState({required this.camera});
   @override
   void initState() {
     super.initState();
@@ -56,21 +58,21 @@ class _OCRPageState extends State<OCRPage> {
                           onPressed: _read,
                           child: Text(
                             'Scanning',
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 15),
                           ),
                         ),
                         ElevatedButton(
                           onPressed: () => {_send2DB(_texts)},
                           child: Text(
                             'Send To DB',
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 15),
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () => {_send2DB(_texts)},
+                          onPressed: _navigationPage,
                           child: Text(
                             'Preview Image',
-                            style: TextStyle(fontSize: 16),
+                            style: TextStyle(fontSize: 15),
                           ),
                         ),
                       ],
@@ -93,7 +95,6 @@ class _OCRPageState extends State<OCRPage> {
   }
 
   Future<Null> _read() async {
-    return;
     List<OcrText> texts = <OcrText>[];
     try {
       texts = await FlutterMobileVision.read(
@@ -132,5 +133,12 @@ class _OCRPageState extends State<OCRPage> {
         substitutionValues: {"aValue": 3, "bValue": texts[0].data});
 
     await connection.close();
+  }
+
+  void _navigationPage() {
+    Navigator.of(context).push(MaterialPageRoute(
+        builder: (context) => TakePictureScreen(
+              camera: widget.camera,
+            )));
   }
 }
